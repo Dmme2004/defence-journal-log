@@ -1,0 +1,94 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Defence Journal Logbook</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>🛡️ DRDO Mission Logbook</h1>
+  </header>
+  <main>
+    <section class="entry-form">
+      <input type="text" id="title" placeholder="Mission Title">
+      <input type="date" id="date">
+      <input type="text" id="tag" placeholder="Tag (e.g., Drone Test)">
+      <textarea id="notes" placeholder="Enter mission details here..."></textarea>
+      <button onclick="saveEntry()">Save Entry</button>
+    </section>
+
+    <section class="search-bar">
+      <input type="text" id="search" placeholder="Search by title/tag..." oninput="searchEntries()">
+    </section>
+
+    <section class="entries" id="entries">
+      <!-- Entries will appear here -->
+    </section>
+  </main>
+
+  <script>
+    let entries = JSON.parse(localStorage.getItem('logbookEntries')) || [];
+
+    function saveEntry() {
+      const title = document.getElementById('title').value.trim();
+      const date = document.getElementById('date').value;
+      const tag = document.getElementById('tag').value.trim();
+      const notes = document.getElementById('notes').value.trim();
+
+      if (!title || !date || !notes) {
+        alert('Please fill in all required fields.');
+        return;
+      }
+
+      const newEntry = { title, date, tag, notes };
+      entries.unshift(newEntry);
+      localStorage.setItem('logbookEntries', JSON.stringify(entries));
+      displayEntries(entries);
+
+      // Clear form
+      document.getElementById('title').value = '';
+      document.getElementById('date').value = '';
+      document.getElementById('tag').value = '';
+      document.getElementById('notes').value = '';
+    }
+
+    function displayEntries(data) {
+      const entriesDiv = document.getElementById('entries');
+      entriesDiv.innerHTML = '';
+
+      data.forEach((entry, index) => {
+        const entryEl = document.createElement('div');
+        entryEl.className = 'entry';
+        entryEl.innerHTML = `
+          <h3>${entry.title}</h3>
+          <p><strong>Date:</strong> ${entry.date}</p>
+          <p><strong>Tag:</strong> ${entry.tag}</p>
+          <p>${entry.notes}</p>
+          <button onclick="deleteEntry(${index})">🗑️ Delete</button>
+        `;
+        entriesDiv.appendChild(entryEl);
+      });
+    }
+
+    function deleteEntry(index) {
+      entries.splice(index, 1);
+      localStorage.setItem('logbookEntries', JSON.stringify(entries));
+      displayEntries(entries);
+    }
+
+    function searchEntries() {
+      const query = document.getElementById('search').value.toLowerCase();
+      const filtered = entries.filter(entry =>
+        entry.title.toLowerCase().includes(query) ||
+        entry.tag.toLowerCase().includes(query)
+      );
+      displayEntries(filtered);
+    }
+
+    window.onload = () => {
+      displayEntries(entries);
+    };
+  </script>
+</body>
+</html>
